@@ -120,3 +120,20 @@ def _resolve_path(path: str) -> str:
     if CURRENT_DIR == "/":
         return "/" + path
     return CURRENT_DIR + "/" + path
+def copy_file(src_path: str, dst_path: str) -> str:
+    global VFS_DATA
+    src_full = _resolve_path(src_path)
+    dst_full = _resolve_path(dst_path)
+
+    if src_full not in VFS_DATA:
+        return f"cp: '{src_path}': Нет такого файла"
+
+    if dst_full in VFS_DIRS:
+        src_name = src_full.split('/')[-1]
+        if dst_full == '/':
+            dst_full = '/' + src_name
+        else:
+            dst_full = dst_full + '/' + src_name
+
+    VFS_DATA[dst_full] = VFS_DATA[src_full]
+    return ""

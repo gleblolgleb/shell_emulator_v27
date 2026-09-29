@@ -12,6 +12,7 @@ def create_complex_vfs():
         zf.writestr('folder1/subfolder/file2.txt', 'Content 2')
         zf.writestr('folder2/', '')
         zf.writestr('folder2/data.bin', b'\x00\x01\x02\x03')
+        zf.writestr('root_file.txt', 'Root file content')
 
 if __name__ == '__main__':
     create_minimal_vfs()

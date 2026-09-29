@@ -49,7 +49,14 @@ def execute_command(command: str, is_script: bool = False) -> bool:
     if command_name == "echo":
         print(" ".join(arguments))
         return True
-
+    if command_name == "cp":
+        if len(arguments) < 2:
+            print("Ошибка: cp требует два аргумента (источник и назначение).")
+            return True
+        result = vfs.copy_file(arguments[0], arguments[1])
+        if result:
+            print(result)
+        return True
     if command_name == "vfs-save":
         if not arguments:
             print("Ошибка: не указан путь.")
