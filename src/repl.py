@@ -1,13 +1,17 @@
 import os
 import shlex
 import argparse
+import time
 import vfs
 
 VFS_NAME = "vfs"
 IS_RUNNING = True
+START_TIME = time.time()
+
 
 def expand_environment_variables(command: str) -> str:
     return os.path.expandvars(command)
+
 
 def execute_command(command: str, is_script: bool = False) -> bool:
     global IS_RUNNING
@@ -22,8 +26,28 @@ def execute_command(command: str, is_script: bool = False) -> bool:
         IS_RUNNING = False
         return False
 
-    if command_name in ("ls", "cd"):
-        print(command_name, *arguments)
+    if command_name == "ls":
+        path = arguments[0] if arguments else None
+        result = vfs.list_dir(path)
+        print(result)
+        return True
+
+    if command_name == "cd":
+        path = arguments[0] if arguments else ""
+        result = vfs.change_dir(path)
+        if result:
+            print(result)
+        return True
+
+    if command_name == "uptime":
+        uptime_seconds = int(time.time() - START_TIME)
+        minutes = uptime_seconds // 60
+        seconds = uptime_seconds % 60
+        print(f"up {minutes} min, {seconds} sec")
+        return True
+
+    if command_name == "echo":
+        print(" ".join(arguments))
         return True
 
     if command_name == "vfs-save":
@@ -44,6 +68,7 @@ def execute_command(command: str, is_script: bool = False) -> bool:
         print(error_msg)
     return True
 
+
 def run_script(script_path: str) -> None:
     if not os.path.exists(script_path):
         print(f"Ошибка: файл скрипта '{script_path}' не найден.")
@@ -59,6 +84,7 @@ def run_script(script_path: str) -> None:
             print(f"[Input] {expanded_line}")
             execute_command(expanded_line, is_script=True)
     print("--- Скрипт завершен ---")
+
 
 def run_shell(vfs_path: str = None, script_path: str = None) -> None:
     global VFS_NAME
@@ -83,12 +109,14 @@ def run_shell(vfs_path: str = None, script_path: str = None) -> None:
         except KeyboardInterrupt:
             print("\nИспользуйте 'exit' для выхода.")
 
+
 def main():
     parser = argparse.ArgumentParser(description="Shell Emulator CLI")
     parser.add_argument('--vfs-path', type=str, help='Path to VFS source')
     parser.add_argument('--script', type=str, help='Path to startup script')
     args = parser.parse_args()
     run_shell(vfs_path=args.vfs_path, script_path=args.script)
+
 
 if __name__ == "__main__":
     main()
