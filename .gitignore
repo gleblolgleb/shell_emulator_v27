@@ -4,4 +4,15 @@ __pycache__/
 .env
 venv/
 .DS_Store
+*.user
+*.suo
+*.zip
+saved_vfs.zip
 .vs/
+*.slnx
+*.sln
+*.user
+*.suo
+*.sqlite
+*.json
+!tsconfig.json
