@@ -1,7 +1,7 @@
 .PHONY: run test
 
 run:
-	python src/main.py
+	python -m src.main
 
 test:
 	pytest tests/
