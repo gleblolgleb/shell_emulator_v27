@@ -25,6 +25,21 @@
   `my_vfs$ `.
 - **Обработка ошибок** — выводит сообщение об ошибке
   при вводе неизвестной команды.
+### Этап 2: Конфигурация
+- **Параметры командной строки:**
+  - `-v, --vfs-path PATH` — путь к физическому расположению VFS
+  - `-s, --script PATH` — путь к стартовому скрипту
+- **Отладочный вывод** — при запуске отображаются все заданные параметры
+- **Стартовый скрипт:**
+  - Выполняет команды последовательно
+  - Ошибочные строки пропускаются (не прерывают выполнение)
+  - Поддерживает комментарии (строки, начинающиеся с `#`)
+  - На экране отображается и ввод (`> команда`), и вывод
+- **Тестовые скрипты** находятся в папке `scripts/`:
+  - `test_default.bat/sh` — запуск без параметров
+  - `test_with_script.bat/sh` — запуск со стартовым скриптом
+  - `test_with_vfs.bat/sh` — запуск с путём к VFS
+  - `test_all.bat/sh` — запуск со всеми параметрами
 ## 3. Команды для сборки проекта и запуска тестов
 ### Запуск эмулятора
 ```
@@ -43,23 +58,40 @@ make tests
 pytests -m pytest tests/
 ```
 ## 4. Примеры использования
+Без параметров (интерактивный режим):
 ```
-my_vfs$ ls -l /tmp
-ls: -l /tmp
+python -m src.main
 ```
+Со стартовым скриптом:
 ```
-my_vfs$ cd /home/user
+python -m src.main -s scripts/startup_example.sh
+```
+С указанием пути к VFS:
+```
+python -m src.main -v /path/to/vfs
+```
+Со всеми параметрами:
+```
+python -m src.main -v /path/to/vfs -s scripts/startup_example.sh
+```
+Пример вывода стартового скрипта:
+```
+=== Debug: Configuration ===
+VFS path: (not set)
+Script path: scripts/startup_example.sh
+============================
+> ls -la /tmp
+ls: -la /tmp
+> cd /home/user
 cd: /home/user
+> unknown_command_should_be_skipped
+Unknown command: unknown_command_should_be_skipped
+> exit
 ```
+Запуск тестовых скриптов:
 ```
-my_vfs$ $HOME
-# раскроется в путь домашнего каталога
-```
-```
-my_vfs$ unknown_cmd
-Unknown command: unknown_cmd
-```
-```
-my_vfs$ exit
-выход из эмулятора
+scripts/test_default.bat
+scripts/test_with_script.bat
+scripts/test_with_vfs.bat
+scripts/test_all.bat
 ```
