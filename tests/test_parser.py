@@ -52,6 +52,8 @@ def test_parse_empty_line():
     name, args = parse_command("")
     assert name == ""
     assert args == []
+
+
 def test_expand_windows_vars():
     """Test expansion of Windows environment variables."""
     import os
