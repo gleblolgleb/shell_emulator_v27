@@ -1,19 +1,8 @@
 """Tests for command handlers."""
 import os
 import tempfile
-import zipfile
 from src.vfs_storage import VFSStorage, FileMetadata
-from src.commands import (
-    cmd_cd,
-    cmd_echo,
-    cmd_exit,
-    cmd_ls,
-    cmd_uptime,
-    cmd_vfs_save,
-    execute,
-    get_unknown_cmd_msg,
-)
-from src.vfs_storage import VFSStorage
+from src.commands import execute, get_unknown_cmd_msg
 
 
 def _make_storage() -> VFSStorage:
