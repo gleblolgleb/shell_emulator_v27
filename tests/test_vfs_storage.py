@@ -3,7 +3,6 @@ import os
 import tempfile
 import zipfile
 from src.vfs_storage import VFSStorage, FileMetadata
-from src.vfs_storage import VFSStorage
 
 
 def _create_test_zip(

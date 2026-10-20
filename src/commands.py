@@ -140,6 +140,24 @@ def cmd_vfs_save(
         print(f"Error saving VFS: {exc}")
 
 
+def cmd_cp(
+    args: list[str], storage: VFSStorage
+) -> None:
+    """Copy file or directory within VFS."""
+    if len(args) != 2:
+        print(
+            "Error: cp requires source "
+            "and destination"
+        )
+        return
+    source, dest = args
+    try:
+        storage.copy_item(source, dest)
+        print(f"Copied: {source} -> {dest}")
+    except FileNotFoundError as exc:
+        print(f"Error: {exc}")
+
+
 def get_unknown_cmd_msg(name: str) -> str:
     """Return error message for unknown command."""
     return UNKNOWN_CMD_MSG.format(name)
@@ -152,6 +170,7 @@ COMMANDS = {
     "uptime": cmd_uptime,
     "echo": cmd_echo,
     "vfs-save": cmd_vfs_save,
+    "cp": cmd_cp,
 }
 
 
