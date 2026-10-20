@@ -2,6 +2,7 @@
 import os
 import tempfile
 import zipfile
+from src.vfs_storage import VFSStorage, FileMetadata
 from src.vfs_storage import VFSStorage
 
 
@@ -111,3 +112,23 @@ def test_change_dir_not_found():
         assert False, "Should raise FileNotFoundError"
     except FileNotFoundError:
         pass
+
+
+def test_get_file_size():
+    """Test getting file size."""
+    storage = VFSStorage()
+    storage._files["/test.txt"] = b"hello"
+    storage._metadata["/test.txt"] = FileMetadata(5)
+    size = storage.get_file_size("/test.txt")
+    assert size == 5
+
+
+def test_get_vfs_hash():
+    """Test VFS hash calculation."""
+    storage = VFSStorage()
+    storage._files["/test.txt"] = b"hello"
+    hash1 = storage.get_vfs_hash()
+    assert len(hash1) == 64
+    storage._files["/test.txt"] = b"world"
+    hash2 = storage.get_vfs_hash()
+    assert hash1 != hash2

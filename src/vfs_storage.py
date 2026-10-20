@@ -1,7 +1,19 @@
 """Virtual file system storage module."""
 import base64
+import hashlib
+import time
 import zipfile
 from pathlib import Path
+
+
+class FileMetadata:
+    """Metadata for a file in VFS."""
+
+    def __init__(self, size: int) -> None:
+        """Initialize metadata with file size."""
+        self.size = size
+        self.created = time.time()
+        self.modified = time.time()
 
 
 class VFSStorage:
@@ -10,6 +22,7 @@ class VFSStorage:
     def __init__(self) -> None:
         """Initialize empty VFS storage."""
         self._files: dict[str, bytes] = {}
+        self._metadata: dict[str, FileMetadata] = {}
         self._dirs: set[str] = {"/"}
         self._current_dir = "/"
 
@@ -32,6 +45,9 @@ class VFSStorage:
                 else:
                     content = archive.read(name)
                     self._files[full_path] = content
+                    self._metadata[full_path] = (
+                        FileMetadata(len(content))
+                    )
                     parent = self._get_parent(full_path)
                     self._dirs.add(parent)
 
@@ -74,15 +90,16 @@ class VFSStorage:
             raise FileNotFoundError(
                 f"Directory not found: {path}"
             )
-        result = []
-        prefix = path if path.endswith("/") else path + "/"
+        result: set[str] = set()
         if path == "/":
             prefix = "/"
+        else:
+            prefix = path if path.endswith("/") else path + "/"
         for file_path in self._files:
             if file_path.startswith(prefix):
                 relative = file_path[len(prefix):]
                 if "/" not in relative:
-                    result.append(relative)
+                    result.add(relative)
         for dir_path in self._dirs:
             if dir_path == path:
                 continue
@@ -90,7 +107,7 @@ class VFSStorage:
                 relative = dir_path[len(prefix):]
                 name = relative.rstrip("/")
                 if "/" not in name:
-                    result.append(name)
+                    result.add(name)
         return sorted(result)
 
     def get_file_content(self, path: str) -> bytes:
@@ -100,6 +117,26 @@ class VFSStorage:
                 f"File not found: {path}"
             )
         return self._files[path]
+
+    def get_file_size(self, path: str) -> int:
+        """Get file size in bytes."""
+        if path in self._metadata:
+            return self._metadata[path].size
+        return 0
+
+    def get_file_time(self, path: str) -> float:
+        """Get file modification time."""
+        if path in self._metadata:
+            return self._metadata[path].modified
+        return 0.0
+
+    def get_vfs_hash(self) -> str:
+        """Calculate SHA-256 hash of all VFS data."""
+        hasher = hashlib.sha256()
+        for file_path in sorted(self._files.keys()):
+            hasher.update(file_path.encode())
+            hasher.update(self._files[file_path])
+        return hasher.hexdigest()
 
     def _get_parent(self, path: str) -> str:
         """Get parent directory path."""
