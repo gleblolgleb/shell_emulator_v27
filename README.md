@@ -38,6 +38,34 @@
   - `test_with_script.bat/sh` — запуск со стартовым скриптом
   - `test_with_vfs.bat/sh` — запуск с путём к VFS
   - `test_all.bat/sh` — запуск со всеми параметрами
+## Этап 3: VFS
+- **VFS Storage** — виртуальная файловая система в
+  памяти:
+  - Загрузка из ZIP-архива (параметр `-v путь`).
+  - Все операции производятся в памяти, без распаковки
+    на диск.
+  - Двоичные данные кодируются в base64 при сохранении.
+- **Команда `vfs-save путь`** — сохраняет состояние VFS
+  на диск в ZIP-архив.
+- **Обработка ошибок загрузки VFS:**
+  - Файл не найден: `Error: VFS file not found: путь`.
+  - Неверный формат: `Error: Invalid VFS format: путь`.
+- **Тестовые VFS** генерируются скриптом:
+  ```
+  python scripts/generate_test_vfs.py
+  ```
+```
+vfs_test/minimal.zip
+```
+минимальный (1 файл).
+```
+vfs_test/multiple.zip
+```
+несколько файлов.
+```
+vfs_test/nested.zip
+``` 
+3+ уровня вложенности.
 ## 3. Команды для сборки проекта и запуска тестов
 ### Запуск эмулятора
 ```
@@ -92,4 +120,8 @@ scripts/test_default.bat
 scripts/test_with_script.bat
 scripts/test_with_vfs.bat
 scripts/test_all.bat
+scripts/test_vfs_minimal.bat
+scripts/test_vfs_multiple.bat
+scripts/test_vfs_nested.bat
+scripts/test_all_stage3.bat
 ```

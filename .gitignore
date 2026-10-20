@@ -10,6 +10,15 @@ venv/
 *.egg-info/
 *.egg
 
+# Архивы и бинарные файлы (правило Г1)
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.gz
+vfs_test/
+
 # IDE - Visual Studio
 *.suo
 *.user
