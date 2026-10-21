@@ -84,31 +84,49 @@ class VFSStorage:
 
     def list_dir(self, path: str | None = None) -> list[str]:
         """List contents of directory."""
-        if path is None:
-            path = self._current_dir
-        if path not in self._dirs:
+        target = path or self._current_dir
+        if target not in self._dirs:
             raise FileNotFoundError(
-                f"Directory not found: {path}"
+                f"Directory not found: {target}"
             )
-        result: set[str] = set()
-        if path == "/":
-            prefix = "/"
-        else:
-            prefix = path if path.endswith("/") else path + "/"
+        prefix = "/" if target == "/" else (
+            target if target.endswith("/") 
+            else target + "/"
+        )
+        result = self._collect_dir_items(target, prefix)
+        return sorted(result)
+
+    def _collect_dir_items(
+        self, target: str, prefix: str
+    ) -> set[str]:
+        """Collect files and subdirectories for listing."""
+        items: set[str] = set()
+        self._add_files(items, prefix)
+        self._add_subdirs(items, target, prefix)
+        return items
+
+    def _add_files(
+        self, items: set[str], prefix: str
+    ) -> None:
+        """Add direct child files to the set."""
         for file_path in self._files:
             if file_path.startswith(prefix):
                 relative = file_path[len(prefix):]
                 if "/" not in relative:
-                    result.add(relative)
+                    items.add(relative)
+
+    def _add_subdirs(
+        self, items: set[str], target: str, prefix: str
+    ) -> None:
+        """Add direct child directories to the set."""
         for dir_path in self._dirs:
-            if dir_path == path:
+            if dir_path == target:
                 continue
             if dir_path.startswith(prefix):
                 relative = dir_path[len(prefix):]
                 name = relative.rstrip("/")
                 if "/" not in name:
-                    result.add(name)
-        return sorted(result)
+                    items.add(name)
 
     def get_file_content(self, path: str) -> bytes:
         """Get file content as bytes."""
