@@ -4,7 +4,7 @@
 class VFS:
     """Virtual file system with a name."""
 
-    DEFAULT_NAME = "my_vfs"
+    default_name = "my_vfs"
 
     def __init__(self, name: str | None = None) -> None:
         """Initialize VFS with given name or default."""
