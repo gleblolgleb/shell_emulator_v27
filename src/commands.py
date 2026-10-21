@@ -13,6 +13,7 @@ HIDDEN_PREFIX = "."
 SIZE_KB = 1024
 SIZE_MB = 1024 * 1024
 SIZE_GB = 1024 * 1024 * 1024
+CP_REQUIRED_ARGS = 2
 
 
 def _parse_ls_flags(args: list[str]) -> tuple[set[str], str]:
@@ -144,7 +145,7 @@ def cmd_cp(
     args: list[str], storage: VFSStorage
 ) -> None:
     """Copy file or directory within VFS."""
-    if len(args) != 2:
+    if len(args) != CP_REQUIRED_ARGS:
         print(
             "Error: cp requires source "
             "and destination"

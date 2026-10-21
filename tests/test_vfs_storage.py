@@ -4,6 +4,9 @@ import tempfile
 import zipfile
 from src.vfs_storage import VFSStorage, FileMetadata
 
+TEST_FILE_SIZE = 5
+SHA256_HEX_LENGTH = 64
+
 
 def _create_test_zip(
     path: str, files: dict[str, bytes]
@@ -117,9 +120,9 @@ def test_get_file_size():
     """Test getting file size."""
     storage = VFSStorage()
     storage._files["/test.txt"] = b"hello"
-    storage._metadata["/test.txt"] = FileMetadata(5)
+    storage._metadata["/test.txt"] = FileMetadata(TEST_FILE_SIZE)
     size = storage.get_file_size("/test.txt")
-    assert size == 5
+    assert size == TEST_FILE_SIZE
 
 
 def test_get_vfs_hash():
@@ -127,7 +130,7 @@ def test_get_vfs_hash():
     storage = VFSStorage()
     storage._files["/test.txt"] = b"hello"
     hash1 = storage.get_vfs_hash()
-    assert len(hash1) == 64
+    assert len(hash1) == SHA256_HEX_LENGTH
     storage._files["/test.txt"] = b"world"
     hash2 = storage.get_vfs_hash()
     assert hash1 != hash2

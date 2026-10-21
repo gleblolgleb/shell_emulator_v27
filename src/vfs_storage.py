@@ -84,31 +84,49 @@ class VFSStorage:
 
     def list_dir(self, path: str | None = None) -> list[str]:
         """List contents of directory."""
-        if path is None:
-            path = self._current_dir
-        if path not in self._dirs:
+        target = path or self._current_dir
+        if target not in self._dirs:
             raise FileNotFoundError(
-                f"Directory not found: {path}"
+                f"Directory not found: {target}"
             )
-        result: set[str] = set()
-        if path == "/":
-            prefix = "/"
-        else:
-            prefix = path if path.endswith("/") else path + "/"
+        prefix = "/" if target == "/" else (
+            target if target.endswith("/") 
+            else target + "/"
+        )
+        result = self._collect_dir_items(target, prefix)
+        return sorted(result)
+
+    def _collect_dir_items(
+        self, target: str, prefix: str
+    ) -> set[str]:
+        """Collect files and subdirectories for listing."""
+        items: set[str] = set()
+        self._add_files(items, prefix)
+        self._add_subdirs(items, target, prefix)
+        return items
+
+    def _add_files(
+        self, items: set[str], prefix: str
+    ) -> None:
+        """Add direct child files to the set."""
         for file_path in self._files:
             if file_path.startswith(prefix):
                 relative = file_path[len(prefix):]
                 if "/" not in relative:
-                    result.add(relative)
+                    items.add(relative)
+
+    def _add_subdirs(
+        self, items: set[str], target: str, prefix: str
+    ) -> None:
+        """Add direct child directories to the set."""
         for dir_path in self._dirs:
-            if dir_path == path:
+            if dir_path == target:
                 continue
             if dir_path.startswith(prefix):
                 relative = dir_path[len(prefix):]
                 name = relative.rstrip("/")
                 if "/" not in name:
-                    result.add(name)
-        return sorted(result)
+                    items.add(name)
 
     def get_file_content(self, path: str) -> bytes:
         """Get file content as bytes."""
@@ -137,98 +155,6 @@ class VFSStorage:
             hasher.update(file_path.encode())
             hasher.update(self._files[file_path])
         return hasher.hexdigest()
-
-    def is_dir(self, path: str) -> bool:
-        """Check if path is a directory."""
-        if path == "/":
-            return True
-        if path.endswith("/"):
-            return path in self._dirs
-        return (
-            path in self._dirs
-            or (path + "/") in self._dirs
-        )
-
-    def is_file(self, path: str) -> bool:
-        """Check if path is a file."""
-        return path in self._files
-
-    def _get_all_files_in_dir(
-        self, dir_path: str
-    ) -> list[str]:
-        """Get all files recursively in a directory."""
-        if not dir_path.endswith("/"):
-            dir_path += "/"
-        result = []
-        for file_path in self._files:
-            if file_path.startswith(dir_path):
-                result.append(file_path)
-        return result
-
-    def _get_all_dirs_in_dir(
-        self, dir_path: str
-    ) -> list[str]:
-        """Get all dirs recursively in a directory."""
-        if not dir_path.endswith("/"):
-            dir_path += "/"
-        result = []
-        for d in self._dirs:
-            if d.startswith(dir_path):
-                result.append(d)
-        return result
-
-    def copy_item(self, source: str, dest: str) -> None:
-        """Copy file or directory within VFS."""
-        source = self._normalize_path(source)
-        dest = self._normalize_path(dest)
-
-        if self.is_file(source):
-            self._copy_file(source, dest)
-        elif self.is_dir(source):
-            self._copy_dir(source, dest)
-        else:
-            raise FileNotFoundError(
-                f"Source not found: {source}"
-            )
-
-    def _copy_file(self, source: str, dest: str) -> None:
-        """Copy a single file."""
-        if self.is_dir(dest):
-            if not dest.endswith("/"):
-                dest += "/"
-            file_name = source.split("/")[-1]
-            dest = dest + file_name
-        self._files[dest] = self._files[source]
-        if source in self._metadata:
-            self._metadata[dest] = self._metadata[source]
-        parent = self._get_parent(dest)
-        self._dirs.add(parent)
-
-    def _copy_dir(self, source: str, dest: str) -> None:
-        """Copy a directory and its contents."""
-        if not source.endswith("/"):
-            source += "/"
-        if self.is_dir(dest):
-            if not dest.endswith("/"):
-                dest += "/"
-            dir_name = source.rstrip("/").split("/")[-1]
-            dest = dest + dir_name + "/"
-        else:
-            if not dest.endswith("/"):
-                dest += "/"
-
-        self._dirs.add(dest.rstrip("/"))
-
-        for d in self._get_all_dirs_in_dir(source):
-            relative = d[len(source):]
-            self._dirs.add(dest + relative)
-
-        for f in self._get_all_files_in_dir(source):
-            relative = f[len(source):]
-            new_f = dest + relative
-            self._files[new_f] = self._files[f]
-            if f in self._metadata:
-                self._metadata[new_f] = self._metadata[f]
 
     def _get_parent(self, path: str) -> str:
         """Get parent directory path."""
