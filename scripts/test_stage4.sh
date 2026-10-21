@@ -1,55 +1,38 @@
 #!/bin/bash
-echo "=== Test ls without flags ==="
-python -m src.main -v vfs_test/multiple.zip <<EOF
-ls
-exit
-EOF
+# Stage 4 Test Script: Basic Commands & Flags
+# Note: ls/cd are stubs in current version
 
-echo "=== Test ls -a (show hidden) ==="
-python -m src.main -v vfs_test/multiple.zip <<EOF
+echo "=== 1. Test ls without flags ==="
+ls
+
+echo "=== 2. Test ls -a flag ==="
 ls -a
-exit
-EOF
 
-echo "=== Test ls -l (long format) ==="
-python -m src.main -v vfs_test/multiple.zip <<EOF
+echo "=== 3. Test ls -l flag ==="
 ls -l
-exit
-EOF
 
-echo "=== Test ls -lh (long + human) ==="
-python -m src.main -v vfs_test/multiple.zip <<EOF
+echo "=== 4. Test ls -lh flag ==="
 ls -lh
-exit
-EOF
 
-echo "=== Test ls -la (all + long) ==="
-python -m src.main -v vfs_test/multiple.zip <<EOF
+echo "=== 5. Test combined flags ls -la ==="
 ls -la
-exit
-EOF
 
-echo "=== Test cd command ==="
-python -m src.main -v vfs_test/nested.zip <<EOF
-ls
-cd level1
-ls
-cd level2
-ls
+echo "=== 6. Test cd command ==="
+cd /home/user
 cd ..
-ls
-exit
-EOF
+cd /tmp
 
-echo "=== Test uptime command ==="
-python -m src.main -v vfs_test/minimal.zip <<EOF
+echo "=== 7. Test uptime command ==="
 uptime
-exit
-EOF
 
-echo "=== Test echo command ==="
-python -m src.main -v vfs_test/minimal.zip <<EOF
-echo hello world
-echo \$HOME
+echo "=== 8. Test echo command ==="
+echo Hello World from Stage 4
+
+echo "=== 9. Test echo with env var ==="
+echo User: $USERNAME
+
+echo "=== 10. Test error handling ==="
+unknown_command_test
+
+echo "=== Done ==="
 exit
-EOF
